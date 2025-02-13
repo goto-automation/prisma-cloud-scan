@@ -21,7 +21,7 @@ env:
 jobs:
   build-and-scan:
     name: Build and scan image
-    runs-on: ubuntu-latest
+    runs-on: goto-linux
 
     steps:
       - name: Check out the repository
