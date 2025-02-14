@@ -21,7 +21,8 @@ env:
 jobs:
   build-and-scan:
     name: Build and scan image
-    runs-on: goto-linux
+    runs-on:
+      group: goto-linux
 
     steps:
       - name: Check out the repository
