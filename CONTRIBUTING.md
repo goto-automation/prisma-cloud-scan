@@ -57,4 +57,4 @@ npm run lint    # ESLint on index.js
 npm run build   # Compile index.js → dist/index.js
 ```
 
-Node.js 20 is required (matches the action runtime).
+Node.js 24 is required (matches the action runtime).
