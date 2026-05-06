@@ -4,6 +4,7 @@ const core = require('@actions/core');
 const { exec } = require('@actions/exec');
 const tc = require('@actions/tool-cache');
 const os = require('os');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 
 const TRUE_VALUES = ['true', 'yes', 'y', '1'];
 
@@ -19,7 +20,7 @@ function joinUrlPath(...parts) {
 }
 
 // Wrapper around 'authenticate' Console API endpoint
-async function authenticate(url, user, pass) {
+async function authenticate(url, user, pass, httpProxy) {
   let parsedUrl;
   try {
     parsedUrl = new URL(url);
@@ -37,6 +38,8 @@ async function authenticate(url, user, pass) {
       headers: {
         'Content-Type': 'application/json',
       },
+      proxy: false,
+      httpsAgent: httpProxy ? new HttpsProxyAgent(httpProxy) : undefined,
       data: {
         username: user,
         password: pass,
@@ -50,7 +53,7 @@ async function authenticate(url, user, pass) {
 }
 
 // Wrapper around 'version' Console API endpoint
-async function getVersion(url, token) {
+async function getVersion(url, token, httpProxy) {
   let parsedUrl;
   try {
     parsedUrl = new URL(url);
@@ -68,6 +71,8 @@ async function getVersion(url, token) {
       headers: {
         'Authorization': `Bearer ${token}`,
       },
+      proxy: false,
+      httpsAgent: httpProxy ? new HttpsProxyAgent(httpProxy) : undefined
     });
     return res.data;
   } catch (err) {
@@ -226,7 +231,7 @@ function formatSarifResults(results) {
         locations: [{
           physicalLocation: {
             artifactLocation: {
-              uri: `${imageName}`,
+              uri: `${finding.packagePath || imageName}`,
             },
             region: {
               startLine: 1,
@@ -281,6 +286,7 @@ async function scan() {
   const project = core.getInput('project');
   const twistcli_debug = core.getInput('twistcli_debug');
   const twistcli_publish = core.getInput('twistcli_publish');
+  const tarball = core.getInput('tarball');
   const resultsFile = core.getInput('results_file');
   const sarifFile = core.getInput('sarif_file');
 
@@ -334,6 +340,9 @@ async function scan() {
     }
     if (TRUE_VALUES.includes(containerized)) {
       twistcliCmd = twistcliCmd.concat(['--containerized']);
+    }
+    if (tarball) {
+      twistcliCmd = twistcliCmd.concat(['--tarball']);
     }
     if (twistcli_publish) {
       twistcliCmd = twistcliCmd.concat([`--publish=${twistcli_publish}`]);
