@@ -41167,7 +41167,7 @@ function formatSarifResults(results) {
         locations: [{
           physicalLocation: {
             artifactLocation: {
-              uri: `${finding.packagePath || imageName}`,
+              uri: `${finding.packagePath || ''}`,
             },
             region: {
               startLine: 1,
